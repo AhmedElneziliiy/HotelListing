@@ -17,6 +17,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
+using Microsoft.AspNetCore.Identity;
+using HotelListing.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace HotelListing
 {
@@ -35,9 +40,12 @@ namespace HotelListing
             services.AddDbContext<DatabaseContext>(options =>
                  options.UseSqlServer(Configuration.GetConnectionString("sqlConnection"))
             );
-           
 
-            //Cors Configurations 
+            services.ConfigureJWT(Configuration);
+            services.AddAuthentication();
+            //services.AddAuthentication();
+            services.ConfigureIdentity();//from ServicesExtension Idetity
+          //Cors Configurations 
             services.AddCors(o =>
             {
                 o.AddPolicy("AllowAll", builder =>
@@ -49,9 +57,10 @@ namespace HotelListing
 
             //Autom mapper
             services.AddAutoMapper(typeof(MapperInitializer));
-
             // Register Unit of work
             services.AddTransient<IUnitOfWork, UnitOfWork>();
+            //register AuthManager
+            services.AddScoped<IAuthManager, AuthManager>();
 
             //swagger configurations
             services.AddSwaggerGen(c =>
@@ -75,11 +84,19 @@ namespace HotelListing
 
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "HotelListing v1"));
+
             
+
             app.UseHttpsRedirection();
+
             app.UseCors("AllowAll");
+
+            app.UseResponseCaching();
+            
+
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
