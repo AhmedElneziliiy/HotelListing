@@ -54,19 +54,10 @@ namespace HotelListing.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetHotel(int id)
         {
-            try
-            {
-                var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id, new List<string> { "Country" });
+              var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id, new List<string> { "Country" });
                 var result = _mapper.Map<HotelDTO>(hotel);
                 return Ok(result);
-            }
-            catch (Exception ex)
-            {
-
-                _logger.LogError(ex, $"Something went wrong{nameof(GetHotel)} ");
-                return StatusCode(500, "internal server error");
-
-            }
+           
         }
 
         [Authorize(Roles = "Administrator")]
@@ -81,20 +72,14 @@ namespace HotelListing.Controllers
                 _logger.LogError($"Invalid POST Attempt in {nameof(CreateHotel)}");
                 return BadRequest(ModelState);
             }
-            try
-            {
+           
                 var hotel = _mapper.Map<Hotel>(hotelDTO);
                 await _unitOfWork.Hotels.Insert(hotel);
 
                 await _unitOfWork.Save();
 
                 return CreatedAtRoute("GetHotel", new { id = hotel.Id }, hotel);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong{nameof(CreateHotel)} ");
-                return StatusCode(500, "internal server error");
-            }
+            
         }
 
         [Authorize]
@@ -110,9 +95,7 @@ namespace HotelListing.Controllers
                 _logger.LogError($"Invalid UPDATE Attempt in {nameof(UpdateHotel)}");
                 return BadRequest(ModelState);
             }
-            try
-            {
-                var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id);
+               var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id);
                 if (hotel ==null)
                 {
                     _logger.LogError($"Invalid UPDATE Attempt in {nameof(UpdateHotel)}");
@@ -123,13 +106,7 @@ namespace HotelListing.Controllers
                 await _unitOfWork.Save();
 
                 return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong{nameof(UpdateHotel)} ");
-                return StatusCode(500, "internal server error");
-
-            }
+            
         }
 
         [Authorize]
@@ -144,8 +121,7 @@ namespace HotelListing.Controllers
                 _logger.LogError($"Invalid DELETE Attempt {nameof(DeleteHotel)}");
                 return BadRequest();   
             }
-            try
-            {
+           
                 var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id);
                 if (hotel is null)
                 {
@@ -158,13 +134,7 @@ namespace HotelListing.Controllers
                 return NoContent();
 
 
-            }
-            catch (Exception ex)
-            {
-
-                _logger.LogError(ex, $"Something went wrong{nameof(DeleteHotel)} ");
-                return StatusCode(500, "internal server error");
-            }
+            
 
         }
     }
